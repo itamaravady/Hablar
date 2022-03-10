@@ -7,8 +7,8 @@ async function query(filterBy = {}) {
     try {
         const criteria = _buildCriteria(filterBy)
         const collection = await dbService.getCollection(CONVERSATION_COLLECTION)
-        const messages = await collection.find(criteria).toArray()
-        // var messages = await collection.aggregate([
+        const conversation = await collection.find(criteria).toArray()
+        // var conversation = await collection.aggregate([
         //     {
         //         $match: criteria
         //     },
@@ -38,7 +38,7 @@ async function query(filterBy = {}) {
         //     }
         // ]).toArray()
 
-        // messages = messages.map(message => {
+        // conversation = conversation.map(message => {
         //     message.byUser = { _id: message.byUser._id, fullname: message.byUser.fullname }
         //     message.aboutUser = { _id: message.aboutUser._id, fullname: message.aboutUser.fullname }
         //     delete message.byUserId
@@ -46,7 +46,7 @@ async function query(filterBy = {}) {
         //     return message
         // })
 
-        return messages
+        return conversation
     } catch (err) {
         // logger.error('cannot find messages', err)
         throw err

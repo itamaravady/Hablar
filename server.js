@@ -28,6 +28,7 @@ if (process.env.NODE_ENV === 'production') {
 
 const authRoutes = require('./api/auth/auth.routes')
 const userRoutes = require('./api/user/user.routes')
+const conversationRoutes = require('./api/conversation/conversation.routes')
 const messageRoutes = require('./api/message/message.routes')
 const { connectSockets } = require('./services/socket.service')
 
@@ -37,7 +38,8 @@ app.all('*', setupAsyncLocalStorage)
 
 app.use('/api/auth', authRoutes)
 app.use('/api/user', userRoutes)
-app.use('/api/conversation', messageRoutes)
+app.use('/api/message', messageRoutes)
+app.use('/api/conversation', conversationRoutes)
 connectSockets(http, session)
 
 // Make every server-side-route to match the index.html
