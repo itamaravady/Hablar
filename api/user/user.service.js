@@ -20,8 +20,6 @@ async function query(filterBy = {}) {
         users = users.map(user => {
             delete user.password
             user.createdAt = ObjectId(user._id).getTimestamp()
-            // Returning fake fresh data
-            // user.createdAt = Date.now() - (1000 * 60 * 60 * 24 * 3) // 3 days ago
             return user
         })
         return users
@@ -89,6 +87,7 @@ async function add(user) {
             username: user.username,
             password: user.password,
             fullname: user.fullname,
+            conversations: [],
         }
         const collection = await dbService.getCollection('user')
         await collection.insertOne(userToAdd)
@@ -112,9 +111,9 @@ function _buildCriteria(filterBy) {
             }
         ]
     }
-    if (filterBy.minBalance) {
-        criteria.score = { $gte: filterBy.minBalance }
-    }
+    // if (filterBy.minBalance) {
+    //     criteria.score = { $gte: filterBy.minBalance }
+    // }
     return criteria
 }
 

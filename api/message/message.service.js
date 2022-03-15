@@ -74,12 +74,13 @@ async function add(conversationId, message) {
     try {
 
         message.byUserId = ObjectId(message.byUserId)
+        message._id = ObjectId();
         const collection = await dbService.getCollection(CONVERSATION_COLLECTION)
-        // await collection.insertOne(message)
-        await collection.update(
-            { "_id": conversationId },
+        await collection.updateOne(
+            { "_id": ObjectId(conversationId) },
             { "$push": { "messages": message } }
-        )
+        );
+        console.log('message:', message);
         return message;
     } catch (err) {
         // logger.error('cannot insert message', err)

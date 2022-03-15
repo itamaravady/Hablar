@@ -33,6 +33,7 @@ async function addMessage(req, res) {
     try {
         var { message, conversationId } = req.body
         message.byUserId = req.session.user._id
+        console.log('message,conversationId:', message, conversationId);
         message = await messageService.add(conversationId, message)
         // socketService.broadcast({ type: 'message-added', data: message, userId: message.byUserId })
         // socketService.emitToUser({ type: 'message-about-you', data: message, userId: message.aboutUserId })

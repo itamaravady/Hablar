@@ -5,7 +5,7 @@ const CONVERSATION_COLLECTION = 'conversation';
 
 async function query(filterBy = {}) {
     try {
-        const criteria = _buildCriteria(filterBy)
+        const criteria = _buildCriteria(JSON.parse(filterBy.params))
         const collection = await dbService.getCollection(CONVERSATION_COLLECTION)
         const conversation = await collection.find(criteria).toArray()
         // var conversation = await collection.aggregate([
@@ -83,9 +83,11 @@ async function add(conversation) {
     }
 }
 
-function _buildCriteria(filterBy) {
+function _buildCriteria({ filterBy }) {
     const criteria = {}
-    if (filterBy.byUserId) criteria.byUserId = filterBy.byUserId
+
+    console.log(filterBy)
+    criteria._id = filterBy._id ? ObjectId(filterBy._id) : null;
     return criteria
 }
 

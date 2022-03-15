@@ -44,5 +44,4 @@ module.exports = {
     getConversation,
     deleteConversation,
     addConversation,
-    addConversation
 }
