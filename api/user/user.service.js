@@ -38,7 +38,7 @@ async function getById(userId) {
 
         return user
     } catch (err) {
-        logger.error(`while finding user ${userId}`, err)
+        // logger.error(`while finding user ${userId}`, err)
         throw err
     }
 }
@@ -48,7 +48,7 @@ async function getByUsername(username) {
         const user = await collection.findOne({ username })
         return user
     } catch (err) {
-        logger.error(`while finding user ${username}`, err)
+        // logger.error(`while finding user ${username}`, err)
         throw err
     }
 }
@@ -70,6 +70,7 @@ async function update(user) {
             _id: ObjectId(user._id), // needed for the returnd obj
             username: user.username,
             fullname: user.fullname,
+            conversations: user.conversations,
         }
         const collection = await dbService.getCollection('user')
         await collection.updateOne({ _id: userToSave._id }, { $set: userToSave })

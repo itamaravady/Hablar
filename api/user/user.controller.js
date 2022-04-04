@@ -17,7 +17,13 @@ async function getUsers(req, res) {
         const filterBy = {
             txt: req.query?.txt || '',
         }
-        const users = await userService.query(filterBy)
+        let users = await userService.query(filterBy);
+        users = users.map((user) => {
+            return {
+                fullname: user.fullname,
+                _id: user._id,
+            }
+        })
         res.send(users)
     } catch (err) {
         logger.error('Failed to get users', err)

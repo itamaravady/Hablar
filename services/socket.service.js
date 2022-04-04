@@ -14,20 +14,18 @@ function connectSockets(http, session) {
         socket.on('disconnect', socket => {
             console.log('Someone disconnected')
         })
-        // socket.on('chat topic', topic => {
-        //     if (socket.myTopic === topic) return;
-        //     if (socket.myTopic) {
-        //         socket.leave(socket.myTopic)
-        //     }
-        //     socket.join(topic)
-        //     socket.myTopic = topic
-        // })
-        socket.on('new message', msg => {
+        socket.on('join conversation', conversationId => {
+            if (socket[conversationId]) return;
+
+            socket.join(conversationId)
+            socket[conversationId] = [conversationId]
+        })
+        socket.on('new message', (msg, conversationId) => {
             console.log('Emitting Chat msg', msg);
             // emits to all sockets:
             socket.broadcast.emit('new message', msg)
             // emits only to sockets in the same room
-            // gIo.to(socket.myTopic).emit('chat addMsg', msg)
+            gIo.to(socket[conversationId]).broadcast.emit('new message', msg)
         })
         // socket.on('set-user-socket', userId => {
         //     logger.debug(`Setting (${socket.id}) socket.userId = ${userId}`)

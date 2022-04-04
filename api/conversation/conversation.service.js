@@ -4,10 +4,11 @@ const asyncLocalStorage = require('../../services/als.service')
 const CONVERSATION_COLLECTION = 'conversation';
 
 async function query(filterBy = {}) {
+
     try {
-        const criteria = _buildCriteria(JSON.parse(filterBy.params))
+        const criteria = _buildCriteria(JSON.parse(filterBy))
         const collection = await dbService.getCollection(CONVERSATION_COLLECTION)
-        const conversation = await collection.find(criteria).toArray()
+        const conversation = await collection.find(criteria).toArray();
         // var conversation = await collection.aggregate([
         //     {
         //         $match: criteria
@@ -72,10 +73,31 @@ async function remove(messageId) {
 
 async function add(conversation) {
     try {
-        console.log('conversation:', conversation);
+        conversation.users.forEach(user => {
+            user._id = ObjectId(user._id);
+        });
         const collection = await dbService.getCollection(CONVERSATION_COLLECTION)
-        conversation = await collection.insertOne(conversation)
 
+        // const criteria = _buildCriteria({ filterBy: { users: conversation.users } })
+        // const existConversation = await collection.findOne(criteria);
+        const existConversations = await collection.aggregate(
+            [
+                {
+                    $match: { "users": { "$elemMatch": { _id: conversation.users[0]._id } } }
+                },
+                {
+                    $match: { "users": { "$elemMatch": { _id: conversation.users[1]._id } } }
+                }
+            ]
+        ).toArray();
+
+
+        // console.log('existConversations._id:', existConversations[0]?._id);
+        if (existConversations.length) {
+            return existConversations[0]
+        }
+        const insertedResult = await collection.insertOne(conversation);
+        conversation._id = insertedResult.insertedId;
         return conversation;
     } catch (err) {
         // logger.error('cannot insert message', err)
@@ -83,11 +105,24 @@ async function add(conversation) {
     }
 }
 
-function _buildCriteria({ filterBy }) {
+function _buildCriteria(filterBy) {
     const criteria = {}
-
-    console.log(filterBy)
+    console.log('filterBy:', filterBy);
+    //Filter by conversation ID
     criteria._id = filterBy._id ? ObjectId(filterBy._id) : null;
+    //Filter by users
+    //TODO JSON stringify the users before adding to criteria
+    if (filterBy.users) {
+        console.log(filterBy.users);
+        let str = JSON.stringify(filterBy.users);
+        criteria.users = { $all: str }
+
+        // let jsonIds = filterBy.users.map(user => {
+        // return { _id: ObjectId(user._id) }
+        // })
+    }
+
+    console.log('criteria:', criteria);
     return criteria
 }
 

@@ -1,3 +1,5 @@
+// require('dotenv').config();
+
 const express = require('express')
 const cors = require('cors')
 const path = require('path')
@@ -14,7 +16,7 @@ const session = expressSession({
     cookie: { secure: false }
 })
 app.use(express.json())
-app.use(session)
+// app.use(session)
 
 if (process.env.NODE_ENV === 'production') {
     app.use(express.static(path.resolve(__dirname, 'public')))
@@ -26,7 +28,7 @@ if (process.env.NODE_ENV === 'production') {
     app.use(cors(corsOptions))
 }
 
-const authRoutes = require('./api/auth/auth.routes')
+// const authRoutes = require('./api/auth/auth.routes')
 const userRoutes = require('./api/user/user.routes')
 const conversationRoutes = require('./api/conversation/conversation.routes')
 const messageRoutes = require('./api/message/message.routes')
@@ -36,7 +38,6 @@ const { connectSockets } = require('./services/socket.service')
 const setupAsyncLocalStorage = require('./middlewares/setupAls.middleware')
 app.all('*', setupAsyncLocalStorage)
 
-app.use('/api/auth', authRoutes)
 app.use('/api/user', userRoutes)
 app.use('/api/message', messageRoutes)
 app.use('/api/conversation', conversationRoutes)
