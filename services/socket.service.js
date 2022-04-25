@@ -1,98 +1,54 @@
 // const asyncLocalStorage = require('./als.service');
 const logger = require('./logger.service');
+const jwt = require('jsonwebtoken');
 
 var gIo = null
 
-function connectSockets(http, session) {
+function connectSockets(http) {
     gIo = require('socket.io')(http, {
         cors: {
             origin: '*',
         }
     })
-    gIo.on('connection', socket => {
-        console.log('New socket', socket.id)
-        socket.on('disconnect', socket => {
-            console.log('Someone disconnected')
-        })
-        socket.on('join conversation', conversationId => {
-            if (socket[conversationId]) return;
 
-            socket.join(conversationId)
-            socket[conversationId] = [conversationId]
-        })
-        socket.on('new message', (msg, conversationId) => {
-            console.log('Emitting Chat msg', msg);
-            // emits to all sockets:
-            socket.broadcast.emit('new message', msg)
-            // emits only to sockets in the same room
-            gIo.to(socket[conversationId]).broadcast.emit('new message', msg)
-        })
-        // socket.on('set-user-socket', userId => {
-        //     logger.debug(`Setting (${socket.id}) socket.userId = ${userId}`)
-        //     socket.userId = userId
-        // })
-        // socket.on('unset-user-socket', () => {
-        //     delete socket.userId
-        // })
-
+    gIo.use((socket, next) => {
+        if (socket.handshake.query?.accessToken) {
+            jwt.verify(socket.handshake.query.accessToken, process.env.ACCESS_TOKEN_SECRET, function (err, user) {
+                if (err) return next(new Error('Authentication error'));
+                socket.user = user;
+                next();
+            });
+        }
+        else {
+            next(new Error('Authentication error'));
+        }
     })
-}
+        .on('connection', socket => {
+            console.log('New socket', socket.id)
+            socket.on('disconnect', socket => {
+                console.log('Someone disconnected', socket.id)
+            })
+            socket.on('join conversation', conversationId => {
+                if (socket[conversationId]) return;
 
-function emitTo({ type, data, label }) {
-    if (label) gIo.to('watching:' + label).emit(type, data)
-    else gIo.emit(type, data)
-}
+                socket.join(conversationId)
+                socket[conversationId] = [conversationId]
+            })
+            socket.on('new message', params => {
+                const { toUserId } = params.message;
+                console.log('🎏message.toUserId:🎏', params.message);
 
-async function emitToUser({ type, data, userId }) {
-    logger.debug('Emiting to user socket: ' + userId)
-    const socket = await _getUserSocket(userId)
-    if (socket) socket.emit(type, data)
-    else {
-        console.log('User socket not found');
-        _printSockets();
-    }
-}
+                socket.to(toUserId).emit('new message', params);
+            })
+            socket.on('new bot message', params => {
+                const { toUserId } = params.message;
+                console.log('🤖message.toUserId:🤖', params.message);
 
-// Send to all sockets BUT not the current socket 
-async function broadcast({ type, data, room = null, userId }) {
-    console.log('BROADCASTING', JSON.stringify(arguments));
-    const excludedSocket = await _getUserSocket(userId)
-    if (!excludedSocket) {
-        // logger.debug('Shouldnt happen, socket not found')
-        // _printSockets();
-        return;
-    }
-    logger.debug('broadcast to all but user: ', userId)
-    if (room) {
-        excludedSocket.broadcast.to(room).emit(type, data)
-    } else {
-        excludedSocket.broadcast.emit(type, data)
-    }
-}
-
-async function _getUserSocket(userId) {
-    const sockets = await _getAllSockets();
-    const socket = sockets.find(s => s.userId == userId)
-    return socket;
-}
-async function _getAllSockets() {
-    // return all Socket instances
-    const sockets = await gIo.fetchSockets();
-    return sockets;
-}
-
-async function _printSockets() {
-    const sockets = await _getAllSockets()
-    console.log(`Sockets: (count: ${sockets.length}):`)
-    sockets.forEach(_printSocket)
-}
-function _printSocket(socket) {
-    console.log(`Socket - socketId: ${socket.id} userId: ${socket.userId}`)
+                gIo.to(toUserId).emit('new bot message', params);
+            })
+        })
 }
 
 module.exports = {
     connectSockets,
-    emitTo,
-    emitToUser,
-    broadcast,
 }

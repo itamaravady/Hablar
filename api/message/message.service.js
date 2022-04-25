@@ -53,6 +53,17 @@ async function query(filterBy = {}) {
     }
 
 }
+async function queryBot() {
+    try {
+
+        const collection = await dbService.getCollection('answers');
+        const messages = await collection.aggregate([{ $sample: { size: 1 } }]).toArray();
+        return messages;
+    } catch (err) {
+        // logger.error('cannot find messages', err)
+        throw err
+    }
+}
 
 async function remove(messageId) {
     try {
@@ -80,7 +91,6 @@ async function add(conversationId, message) {
             { "_id": ObjectId(conversationId) },
             { "$push": { "messages": message } }
         );
-        console.log('message:', message);
         return message;
     } catch (err) {
         // logger.error('cannot insert message', err)
@@ -96,6 +106,7 @@ function _buildCriteria(filterBy) {
 
 module.exports = {
     query,
+    queryBot,
     remove,
     add
 }

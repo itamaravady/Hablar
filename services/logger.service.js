@@ -27,9 +27,7 @@ function doLog(level, ...args) {
 
     var line = strs.join(' | ')
     const store = asyncLocalStorage.getStore()
-    const sessionId = store?.sessionId
-    const sid = sessionId ? `(sid: ${sessionId})` : ''
-    line = `${getTime()} - ${level} - ${line} ${sid}\n`
+    line = `${getTime()} - ${level} - ${line} \n`
     console.log(line)
     fs.appendFileSync('./logs/backend.log', line)
 }

@@ -9,7 +9,7 @@ module.exports = {
     getByUsername,
     remove,
     update,
-    add
+    add,
 }
 
 async function query(filterBy = {}) {
@@ -41,14 +41,16 @@ async function getById(userId) {
         // logger.error(`while finding user ${userId}`, err)
         throw err
     }
-}
+};
+
+
 async function getByUsername(username) {
     try {
         const collection = await dbService.getCollection(USER_COLLECTION)
         const user = await collection.findOne({ username })
         return user
     } catch (err) {
-        // logger.error(`while finding user ${username}`, err)
+        logger.error(`while finding user ${username}`, err)
         throw err
     }
 }

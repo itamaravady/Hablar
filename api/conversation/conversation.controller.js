@@ -5,13 +5,14 @@ const conversationService = require('./conversation.service')
 async function getConversation(req, res) {
     try {
         const conversations = await conversationService.query(req.query.filterBy)
-        console.log('conversation:', conversations);
         res.send(conversations)
     } catch (err) {
         logger.error('Cannot get conversations', err)
         res.status(500).send({ err: 'Failed to get conversations' })
     }
 }
+
+
 
 async function deleteConversation(req, res) {
     try {
@@ -28,11 +29,6 @@ async function addConversation(req, res) {
     try {
         var conversation = req.body
         conversation = await conversationService.add(conversation)
-        console.log('conversation:', conversation);
-        // socketService.broadcast({ type: 'conversation-added', data: conversation, userId: conversation.byUserId })
-        // socketService.emitToUser({ type: 'conversation-about-you', data: conversation, userId: conversation.aboutUserId })
-        // socketService.emitTo({ type: 'user-updated', data: fullUser, label: fullUser._id })
-
         res.json(conversation)
 
     } catch (err) {

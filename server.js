@@ -3,20 +3,11 @@
 const express = require('express')
 const cors = require('cors')
 const path = require('path')
-const expressSession = require('express-session')
 
 const app = express()
 const http = require('http').createServer(app)
 
-// Express App Config
-const session = expressSession({
-    secret: 'hablar hebrew!',
-    resave: false,
-    saveUninitialized: true,
-    cookie: { secure: false }
-})
 app.use(express.json())
-// app.use(session)
 
 if (process.env.NODE_ENV === 'production') {
     app.use(express.static(path.resolve(__dirname, 'public')))
@@ -41,7 +32,8 @@ app.all('*', setupAsyncLocalStorage)
 app.use('/api/user', userRoutes)
 app.use('/api/message', messageRoutes)
 app.use('/api/conversation', conversationRoutes)
-connectSockets(http, session)
+// connectSockets(http, session)
+connectSockets(http)
 
 // Make every server-side-route to match the index.html
 // so when requesting http://localhost:3030/index.html/car/123 it will still respond with

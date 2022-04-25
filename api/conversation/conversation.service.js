@@ -55,6 +55,8 @@ async function query(filterBy = {}) {
 
 }
 
+
+
 async function remove(messageId) {
     try {
         const store = asyncLocalStorage.getStore()
@@ -107,7 +109,6 @@ async function add(conversation) {
 
 function _buildCriteria(filterBy) {
     const criteria = {}
-    console.log('filterBy:', filterBy);
     //Filter by conversation ID
     criteria._id = filterBy._id ? ObjectId(filterBy._id) : null;
     //Filter by users
@@ -122,7 +123,6 @@ function _buildCriteria(filterBy) {
         // })
     }
 
-    console.log('criteria:', criteria);
     return criteria
 }
 
