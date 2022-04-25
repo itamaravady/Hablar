@@ -13,7 +13,8 @@ async function getUser(req, res) {
 }
 async function getUserByName(req, res) {
     try {
-        const user = await userService.getByUsername(req.query.username)
+        const user = await userService.getByUsername(req.query.username);
+        delete user.password;
         res.send(user)
     } catch (err) {
         logger.error('Failed to get user', err)
